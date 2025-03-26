@@ -271,7 +271,7 @@ body{
     
 }
 
-@media (max-width: 375px) {
+@media (max-width: 360px) {
     .attraction-grid {
         grid-template-columns: 1fr;
         gap:15px;

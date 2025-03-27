@@ -1,9 +1,12 @@
 from fastapi import *
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles  # 新增這行
 import mysql.connector.pooling
 import json
 
 app=FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 # 過濾圖片 URL
 def filter_image_urls(url):

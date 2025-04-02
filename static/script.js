@@ -111,7 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
         attractions.forEach(attraction => {
             const mrtDisplay = attraction.MRT? attraction.MRT : '無捷運站';
             
-            const card = document.createElement('div');
+            const card = document.createElement('a'); //使用a連結
+            card.href = `/attraction/${attraction.id}`; //連結指向景點頁面    
             card.className = 'attraction-container';
             card.innerHTML = `
                 <div class="attraction-image">

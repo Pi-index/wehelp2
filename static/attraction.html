@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Attraction</title>
   <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/auth.css">
   <style>
     .navbar {
       border-bottom: 1px solid #E8E8E8;  /* 新增底部邊框 */
@@ -277,7 +278,7 @@
       <h1 class="logo"><a href="/" style="color:inherit;text-decoration:none;">台北一日遊</a></h1>
       <div class="auth-section">
         <button class="rev">預定行程</button>
-        <button class="log-reg">登入/註冊</button>
+        <button id="authButton" class="log-reg">登入/註冊</button>
       </div>
     </div>
   </nav>
@@ -358,6 +359,43 @@
     <p>COPYRIGHT © 2021 台北一日遊</p>
   </footer>
 
+  <div id="authDialog" class="auth-dialog">
+    <div class="auth-content">
+        <button id="closeDialogButton" class="close-button">
+            <img src="/static/close.png" alt="關閉">
+        </button>
+        <div id="loginTab" class="auth-tab active">
+            <h2>登入會員帳號</h2>
+            <form id="loginForm">
+                <input type="email" name="email" placeholder="輸入電子信箱" required>
+                <input type="password" name="password" placeholder="輸入密碼" required>
+                <button type="submit">登入帳戶</button>
+            </form>
+            <p>還沒有帳戶？<a href="#" class="switch-tab" data-tab="signup">點此註冊</a></p>
+            <div class="message-container">
+                    <p class="error-message" id="loginError"></p>
+                    <p class="success-message" id="loginSuccess"></p>
+            </div>
+        </div>
+
+        <div id="signupTab" class="auth-tab">
+            <h2>註冊會員帳號</h2>
+            <form id="signupForm">
+                <input type="text" name="name" placeholder="輸入姓名" required>
+                <input type="email" name="email" placeholder="輸入電子信箱" required>
+                <input type="password" name="password" placeholder="輸入密碼" required>
+                <button type="submit">註冊新帳戶</button>
+            </form>
+            <p>已經有帳戶了？<a href="#" class="switch-tab" data-tab="login">點此登入</a></p> 
+            <div class="message-container">
+                    <p class="error-message" id="signupError"></p>
+                    <p class="success-message" id="signupSuccess"></p>
+                </div>
+        </div>
+    </div>
+  </div>  
+<!-- 載入共用登入元件 -->
+  <script src="/static/auth.js"></script>
   <script src="/static/attraction.js"></script>
   
 </body>

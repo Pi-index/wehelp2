@@ -1,0 +1,130 @@
+
+/* 登入/註冊彈窗 */
+.auth-dialog {
+    display: none; /* *** 預設隱藏 *** */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+    z-index: 1001; /* 比 navbar 更高 */
+    justify-content: center; /* 水平居中 */
+    align-items: flex-start; /* 垂直居中 */
+    padding-top:74px;
+}
+
+.auth-content {
+    background: white;
+    width: 90%; /* 響應式寬度 */
+    max-width: 320px; /* 最大寬度 */
+    min-height:245px;
+    padding: 15px 10px; /* 內距 */
+    border-radius: 8px; /* 圓角 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* 陰影 */
+    position: relative; /* 為了關閉按鈕定位 */
+    overflow: hidden; /* 新增：確保偽元素的圓角被裁切 */
+}
+.auth-content::before {
+    content:'';/*偽元素使用*/
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:10px;
+    background:linear-gradient(90deg, #66aabb, #337788);
+
+}
+
+/* 關閉按鈕 */
+.close-button {
+    position: absolute;
+    top: 20px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px; /* 增加點擊區域 */
+    opacity: 0.7; 預設透明度
+}
+.close-button:hover {
+    opacity: 1; /* 滑鼠懸停時不透明 */
+}
+
+.close-button img {
+        width: 16px; /* 調整圖片寬度 */
+        height: 16px; /* 調整圖片高度 */
+        display: block; /* 確保圖片是塊級元素 */
+}
+
+.auth-tab {
+    display: none; /* 預設隱藏頁籤內容 */
+}
+
+.auth-tab.active {
+    display: block; /* 顯示當前頁籤 */
+}
+
+.auth-tab h2 {
+    text-align: center;
+    margin-bottom: 12px;
+    margin-top:8px;
+    font-size:24px ;
+    line-height:24px;
+    font-weight: 700;
+    color: #666666;
+}
+
+.auth-tab form input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box; /* 避免 padding 影響寬度 */
+}
+
+.auth-tab form button {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #448899;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.auth-tab form button:hover {
+    background-color: #367a8a;
+}
+
+.auth-tab p {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.auth-tab p a {
+    color: #448899;
+    text-decoration: none;
+    cursor: pointer;
+}
+.auth-tab p a:hover {
+    text-decoration: underline;
+}
+
+.message-container {
+    min-height: 1.2rem; /* 佔據空間避免跳動 */
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.error-message, .success-message {
+    color: #dc3545; /* 紅色 */
+    font-size: 0.9rem;
+    display: none; /* 預設隱藏 */
+}

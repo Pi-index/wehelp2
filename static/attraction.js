@@ -94,7 +94,38 @@ async function getAttractionData() {
     });
 }
 }
-  
+
+// 預定按鈕處理
+document.querySelector('.book-btn').addEventListener('click', async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    document.dispatchEvent(new CustomEvent('showAuthDialog'));
+    return;
+  }
+
+  // 收集表單資料
+  const bookingData = {
+    attractionId: window.location.pathname.split('/').pop(),
+    date: document.getElementById('bookingDate').value,
+    time: document.querySelector('.time-option.active').dataset.time,
+    price: parseInt(document.getElementById('price').textContent)
+  };
+
+  try {
+    const res = await fetch('/api/booking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(bookingData)
+    });
+    if (res.ok) window.location.href = '/booking';
+  } catch (err) {
+    console.error('預定失敗:', err);
+  }
+});
+
   /*---------- 時間選擇功能 ----------*/
   function setupTimeSelect() {
     const options = document.querySelectorAll('.time-option');
@@ -120,4 +151,6 @@ async function getAttractionData() {
     // 設定日期選擇器最小日期為今天
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('bookingDate').min = today;
+    document.getElementById('bookingDate').value = today;
   });
+

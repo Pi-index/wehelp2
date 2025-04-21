@@ -3,9 +3,334 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Booking</title>
-</head>
-<body>
+  <title>booking</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/auth.css">
+  <style>
+    .navbar {
+      border-bottom: 1px solid #E8E8E8;  
+    }
+    /* RWD 佈局樣式 */
+    .booking-container { max-width: 1200px; margin: 74px auto 20px; padding: 0 ; color: #666666 ; font-family: 'Noto Sans TC' ;font-weight: 700;     width: 100%;  }
+    #bookingTitle { max-width: 1000px;  margin: 0 auto;  text-align: left; font-size: 19px;}
+    .booking-item { display: flex; gap: 30px; padding: 0px 110px; padding-bottom: 20px;border-bottom: 1px solid  #E8E8E8;      width: 100%;  }
+
+    .booking-image { 
+    width: 300px;  /* 固定圖片容器寬度 */
+    }
+    .booking-image img { 
+      height: 200px;        
+      object-fit: cover; /* 圖片裁剪以填滿容器 */
+      object-position: center; /* 圖片置中 */
+      overflow: hidden; /* 隱藏超出部分 */
+      } 
+    .booking-info {  flex: 1; position: relative;  }
+    .delete-btn { 
+      position: absolute; top: 20px; right: 120px; 
+      background: none; color: white; border: none;
+      cursor: pointer;
+
+    }
+
+    .payment-section,.user-section  {
+      padding: 0px 110px; padding-bottom: 20px;
+      background: white;
+      margin-top: 20px;
+      border-bottom: 1px solid #E8E8E8;  
+    }
+
+    .security-note {
+      color: #666666;
+      font-size: 0.9em;
+      margin-top: 10px;
+    }
+
+    input::placeholder {
+    font-size: 16px; /* 調整字型大小 */
+
+    }
+    .submit-btn {
+      background: #448899;
+      color: white;
+      font-size:19px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      float: right; /* 讓按鈕靠右 */
+      margin-right: 100px; /* 右邊留出 100px 的間距 */
+      cursor: pointer;
+    }
+
+    @media (max-width: 1200px) {
+      .delete-btn {
+      /* 動態左移 */
+      right: calc(15px + 10vw); 
+      }
+      #bookingTitle {  text-align:center; }
+    }
+
+
+    @media (max-width: 768px) {
+      .booking-item { flex-direction: column; }
+      .booking-image { width: 100%; height: auto; }
+      .booking-item, .payment-section,.user-section  {  padding: 0px 60px; }
+    }
+
   
-</body>
-</html>
+
+  /* 极端小屏幕处理 */
+  @media (max-width: 480px) {
+    .delete-btn {
+      position: relative;
+      display: block;
+      width: fit-content;
+      margin: 0px 0 0 auto;
+      transform: none;
+      top: -10px; /* 往上移動 10px */
+    }
+    .booking-item, .payment-section,.user-section  {  padding: 0px 10px; }
+    .booking-image { 
+    width: 340px;  /* 固定圖片容器寬度 */
+    }
+    .booking-image img { 
+      width: 340px;      
+      } 
+  }
+  </style>
+</head>
+
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <!-- Part 3-4: 網站標題返回首頁連結，超連結顏色不紀錄 -->
+        <h1 class="logo"><a href="/" style="color:inherit;text-decoration:none;">台北一日遊</a></h1>
+        <div class="auth-section">
+          <button class="rev" id="bookingNav">預定行程</button>
+          <button id="authButton" class="log-reg">登入/註冊</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="booking-container">
+      <div id="bookingTitle"> 
+        <p></p>
+      </div>
+      <div id="bookingContent"> 
+        <!-- 動態載入預定資料 -->
+      </div>
+
+    </main> 
+    <!-- 頁尾 -->
+    <footer class="footer">
+      <p>COPYRIGHT © 2021 台北一日遊</p>
+    </footer>
+
+    <script> 
+
+    // 渲染付款表單
+    function renderPaymentForm(userData) {
+      return `
+        <div class="user-section">
+          <h3>您的聯絡資訊</h3>
+          <form id="userForm">
+            <div class="form-group" style="margin-bottom: 15px";>
+              <label>聯絡姓名：</label>
+              <input id="user-name"
+                   placeholder 
+                   value="${userData?.name}" 
+                   style="width: 200px; height: 40px; 
+                   border: 1px solid rgba(0, 0, 0, 0.3); 
+                   border-radius: 8px; 
+                   font-size:16px"/>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px";>
+              <label>聯絡信箱：</label>
+              <input id="user-email" 
+                   placeholder 
+                   value="${userData?.email}" 
+                   style="width: 200px; height: 40px; 
+                   border: 1px solid rgba(0, 0, 0, 0.3); 
+                   border-radius: 8px; 
+                   font-size:16px"/>
+            </div>
+            <div class="form-group" ;>
+              <label>手機號碼：</label>
+                <input id="phone" placeholder 
+                  style="width: 200px; height: 40px; 
+                   border: 1px solid rgba(0, 0, 0, 0.3); 
+                   border-radius: 8px; 
+                   font-size:16px"/>
+            </div>
+
+          </form>
+          <div class="security-note">
+            <p>請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式</p>
+          </div>
+        </div>  
+      <div class="payment-section">
+          <h3>信用卡付款</h3>
+          <form id="paymentForm">
+            <div class="form-group" style="margin-bottom: 15px";>
+              <label>卡片號碼：</label>
+              <input id="card-number" placeholder="${cardData.number.placeholder}" 
+                   style="width: 200px; height: 40px; 
+                   border: 1px solid rgba(0, 0, 0, 0.3); 
+                   border-radius: 8px; 
+                   font-size:16px"/>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px";>
+              <label>過期時間：</label>
+              <input id="card-expiry" placeholder="${cardData.expirationDate.placeholder}" 
+                   style="width: 200px; height: 40px; 
+                   border: 1px solid rgba(0, 0, 0, 0.3); 
+                   border-radius: 8px; 
+                   font-size:16px"/>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px";>
+              <label>驗證密碼：</label>
+                <input id="card-ccv" placeholder="${cardData.ccv.placeholder}" 
+                   style="width: 200px; height: 40px; 
+                   border: 1px solid rgba(0, 0, 0, 0.3); 
+                   border-radius: 8px; 
+                   font-size:16px"/>
+            </div>
+
+          </form>
+
+        </div>
+      `
+      }
+
+    // 取得使用者資料
+    async function getUserProfile(token) {
+      try {
+        const res = await fetch('/api/user/auth', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) {
+          throw new Error('無法取得使用者資料');
+        }
+        
+        const { data } = await res.json();
+        return data;
+      } catch (err) {
+        console.error('取得使用者資料失敗:', err);
+        return null;
+      }
+    }
+
+    // 定義資料
+    const cardData = {
+      number: {
+        element: '#card-number',
+        placeholder: '**** **** **** ****'
+      },
+      expirationDate: {
+        element: '#card-expiry',
+        placeholder: 'MM / YY'
+      },
+      ccv: {
+        element: '#card-ccv',
+        placeholder: 'CVV'
+      },
+      styles: {
+        valid: { color: 'green' },
+        invalid: { color: 'red' }
+      }
+    };
+
+    // 初始化預定頁面
+    async function initBookingPage() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/';
+        return;
+      }
+
+      try {
+        // 同時取得預定資料和使用者資料
+        const [bookingRes, userData] = await Promise.all([
+          fetch('/api/booking', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          getUserProfile(token)
+        ]);
+
+        if (bookingRes.status === 403) {
+          localStorage.removeItem('token');
+          window.location.reload();
+          return;
+        }
+
+        const bookingData = await bookingRes.json();
+    
+          // 渲染時傳入使用者資料
+          renderBooking(bookingData.data, userData);
+
+        } catch (err) {
+          console.error('初始化失敗:', err);
+        }
+
+    }
+
+
+    // 渲染預定資料
+    function renderBooking(data,userData) {
+        const container = document.getElementById('bookingContent');
+        const titleElement = document.querySelector('.booking-container p ');
+        if (userData && userData.name) {
+          titleElement.textContent = `您好，${userData.name}，待預定的行程如下：`;
+        } 
+        
+        if (!data) {
+          container.innerHTML = '<p style="margin-left: 100px;">目前沒有預定行程</p>';
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="booking-item">
+            <div class="booking-image">
+              <img src="${data.attraction.image}" alt="${data.attraction.name}">
+            </div>
+            <div class="booking-info">
+              <p style="font-size: 16px; color: #448899;" >台北一日遊：${data.attraction.name}</p>
+              <p style="font-size: 16px;">日期：${data.date}</p>   
+              <p style="font-size: 16px;">時間：${data.time === 'morning' ? '早上9點到12點' : '下午1點到4點'}</p>
+              <p style="font-size: 16px;">費用：新台幣 ${data.price} 元</p>
+              <p style="font-size: 16px;">地點：${data.attraction.address} </p>
+              <button class="delete-btn">
+                <img src="/static/del.png" alt="刪除預定" style="width: 30px; height: 30px;" />
+              </button>
+            </div>
+          </div>
+          ${renderPaymentForm(userData)}  
+          <p style="text-align:right; padding-right:100px;">總價：新台幣 ${data.price} 元</p>
+          <button type="button" id="confirmPayment" class="submit-btn" >
+              確認訂購並付款
+          </button>
+
+        `;
+
+        // 綁定刪除按鈕事件
+        document.querySelector('.delete-btn').addEventListener('click', async () => {
+          try {
+            const res = await fetch('/api/booking', {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (res.ok) window.location.reload();
+          } catch (err) {
+            console.error('刪除失敗:', err);
+          }
+        });
+      }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', initBookingPage);
+    </script> 
+
+  <!-- 載入共用登入元件 -->
+    <script src="/static/auth.js"></script>
+  </body>
+  </html> 

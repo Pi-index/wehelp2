@@ -1,3 +1,22 @@
+// auth.js 頂部加入這些函式定義
+function showAuthDialog(defaultTab = 'login') {
+    switchAuthTab(defaultTab);
+    authDialog.style.display = 'flex';
+    document.body.classList.add('no-scroll');
+  }
+  
+function hideAuthDialog() {
+    authDialog.style.display = 'none';
+    document.body.classList.remove('no-scroll');
+    clearMessages();
+    }
+  
+function switchAuthTab(tabName) {
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+        tab.style.display = tab.id === `${tabName}Tab` ? 'block' : 'none';
+    });
+    }
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM 元素
     const authButton = document.getElementById('authButton');
@@ -5,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeDialogButton = document.getElementById('closeDialogButton');
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
+    const bookingNav = document.getElementById('bookingNav');
 
     // 狀態檢查函式
     async function checkAuthStatus() {
@@ -105,6 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             showMessage('loginError', '連線錯誤，請稍後再試');
         }
+        if (res.ok) {
+            localStorage.setItem('token', token);
+            // 特殊處理：在預定頁面登入時刷新
+            if (window.location.pathname === '/booking') {
+              window.location.reload();
+            }
+          }
     }
 
     // 註冊處理
@@ -189,6 +216,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+      // 預定按鈕處理
+    if (bookingNav) {
+        bookingNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+        if (token) {
+            window.location.href = '/booking';
+        } else {
+            showAuthDialog('login');
+        }
+        });
+    }
+
     // 初始化
     function init() {
         setupEventListeners();
@@ -200,3 +240,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     init();
 });
+
+// 在 auth.js 新增全域事件監聽器
+document.addEventListener('showAuthDialog', (e) => {
+    showAuthDialog('login')
+  })
+  
+// 修改預定按鈕事件監聽
+document.getElementById('bookingNav')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    if (token) {
+      window.location.href = '/booking';
+    } else {
+      showAuthDialog('login'); // 直接呼叫函式
+    }
+  });  
+
+  

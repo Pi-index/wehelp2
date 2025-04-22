@@ -6,6 +6,8 @@ import json
 import jwt  # 新增 JWT 相關套件
 from datetime import datetime, timedelta  # 處理 Token 過期時間
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials  # 處理 Bearer Token
+from typing import Optional
+
 
 app = FastAPI()
 
@@ -379,6 +381,164 @@ async def get_user_info(current_user: dict = Depends(get_current_user)):
         })
     else:
         return JSONResponse(content={"data": None})  # 未登入回傳 nul
+    
+
+@app.post("/api/booking")
+async def create_booking(
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Part 5-1: 建立預定行程 (嚴格符合 API 規格)
+    """
+    if not current_user:
+        return JSONResponse(
+            content={"error": True, "message": "未登入系統，拒絕存取"},
+            status_code=403
+        )
+
+    try:
+        data = await request.json()
+        # 僅檢查必要欄位存在性 (依規格要求)
+        required_fields = ["attractionId", "date", "time", "price"]
+        if not all(field in data for field in required_fields):
+            return JSONResponse(
+                content={"error": True, "message": "輸入資料不完整"},
+                status_code=400
+            )
+
+        # 直接使用參數 (不進行格式驗證)
+        conn = db_pool.get_connection()
+        cursor = conn.cursor()
+        
+        # 實現替換邏輯 (依規格要求)
+        conn.start_transaction()
+        cursor.execute(
+            "DELETE FROM bookings WHERE user_id = %s",
+            (current_user["id"],)
+        )
+        cursor.execute(
+            """
+            INSERT INTO bookings 
+            (user_id, attraction_id, date, time, price)
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (
+                current_user["id"],
+                data["attractionId"],
+                data["date"],
+                data["time"],
+                data["price"]
+            )
+        )
+
+        conn.commit()
+        return JSONResponse(content={"ok": True})  # 依規格範例格式
+
+    except Exception as e:
+        conn.rollback()
+        return JSONResponse(
+            content={"error": True, "message": "伺服器內部錯誤"},
+            status_code=500
+        )
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
+
+# 取得預定行程 API      
+@app.get("/api/booking")
+async def get_booking(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Part 5-1: 取得預定行程 (嚴格符合 API 規格)
+    """
+    if not current_user:
+        return JSONResponse(
+            content={"error": True, "message": "未登入系統，拒絕存取"},
+            status_code=403
+        )
+
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT 
+                b.attraction_id,
+                b.date,
+                b.time,
+                b.price,
+                m.name as attraction_name,
+                m.address,
+                m.images
+            FROM bookings b
+            JOIN major m ON b.attraction_id = m.id
+            WHERE b.user_id = %s
+            ORDER BY b.created_at DESC
+            LIMIT 1
+        """, (current_user["id"],))
+        
+        booking = cursor.fetchone()
+
+        # 完全對應規格範例格式
+        return JSONResponse(content={
+            "data": {
+                "attraction": {
+                    "id": booking["attraction_id"],
+                    "name": booking["attraction_name"],
+                    "address": booking["address"],
+                    "image": json.loads(booking["images"])[0]
+                },
+                "date": booking["date"].strftime("%Y-%m-%d"),
+                "time": booking["time"],
+                "price": booking["price"]
+            } if booking else None
+        })
+
+    except Exception as e:
+        return JSONResponse(
+            content={"error": True, "message": "伺服器內部錯誤"},
+            status_code=500
+        )
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
+
+@app.delete("/api/booking")
+async def delete_booking(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Part 5-1: 刪除預定行程 (嚴格符合 API 規格)
+    """
+    if not current_user:
+        return JSONResponse(
+            content={"error": True, "message": "未登入系統，拒絕存取"},
+            status_code=403
+        )
+
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            "DELETE FROM bookings WHERE user_id = %s",
+            (current_user["id"],)
+        )
+        conn.commit()
+        
+        return Response(status_code=200)  # 依規格範例格式
+
+    except Exception as e:
+        conn.rollback()
+        return JSONResponse(
+            content={"error": True, "message": "伺服器內部錯誤"},
+            status_code=500
+        )
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
 
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
